@@ -756,6 +756,7 @@ async function confirmDistribution() {
   const pn   = document.getElementById("parentName").value.trim();
   const now  = new Date();
   const date = Math.floor((now - new Date(Date.UTC(1899, 11, 30))) / 86400000);
+  const dateDisplay = `${String(now.getDate()).padStart(2,"0")}/${String(now.getMonth()+1).padStart(2,"0")}/${now.getFullYear()}`;
 
   const btn = document.getElementById("confirmBtn");
   btn.classList.add("saving");
@@ -783,7 +784,7 @@ async function confirmDistribution() {
     // Update session log
     Object.keys(cart).forEach(id => {
       const item = ITEMS.find(i=>i.id==id);
-      sessionLog.push({ date, itemId:+id, itemName:item.name, student:sn, grade:sg, parent:pn, qty:cart[id] });
+      sessionLog.push({ date: dateDisplay, itemId:+id, itemName:item.name, student:sn, grade:sg, parent:pn, qty:cart[id] });
     });
 
     cart = {};
