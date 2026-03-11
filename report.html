@@ -203,7 +203,9 @@ function excelDateToString(val) {
   if (typeof val === "number" || (typeof val === "string" && !isNaN(Number(val)) && !String(val).includes("-") && !String(val).includes("/"))) {
     const serial = Number(val);
     if (!serial || serial < 1) return "";
-    const d = new Date(Math.round((serial - 25569) * 86400 * 1000));
+    // Use UTC date parts to avoid timezone shifting
+    const ms  = (serial - 25569) * 86400 * 1000;
+    const d   = new Date(ms);
     const day   = String(d.getUTCDate()).padStart(2,"0");
     const month = String(d.getUTCMonth()+1).padStart(2,"0");
     const year  = d.getUTCFullYear();
@@ -301,12 +303,26 @@ async function loadData() {
     }));
 
     allRows = (distData.values||[]).filter(r=>r[2]&&r[2]!=="").map(r=>{
-      console.log("RAW DATE:", r[0], typeof r[0]);
+      const serial = Number(r[0]);
+      // Convert serial back to DD/MM/YYYY using Python-verified formula (days from 1899-12-30)
+      let displayDate = "";
+      let isoDate = "";
+      if (serial > 0) {
+        const ms = (serial - 25569) * 86400 * 1000;
+        const d  = new Date(ms);
+        const dd = String(d.getUTCDate()).padStart(2,"0");
+        const mm = String(d.getUTCMonth()+1).padStart(2,"0");
+        const yy = d.getUTCFullYear();
+        displayDate = `${dd}/${mm}/${yy}`;
+        isoDate = `${yy}-${mm}-${dd}`;
+      } else {
+        displayDate = String(r[0]||"");
+        isoDate = displayDate;
+      }
       return {
-        date:    excelDateToString(r[0]),
-        dateRaw: typeof r[0]==="string" && r[0].includes("-") ? r[0] : (Number(r[0]) ? new Date(Math.round((Number(r[0])-25569)*86400*1000)).toISOString().slice(0,10) : ""),
-        item:    r[1]||"", student:r[2]||"", grade:r[3]||"",
-        parent:  r[4]||"", qty:Number(r[5])||1, notes:r[7]||""
+        date: displayDate, dateRaw: isoDate,
+        item: r[1]||"", student:r[2]||"", grade:r[3]||"",
+        parent:r[4]||"", qty:Number(r[5])||1, notes:r[7]||""
       };
     });
 
