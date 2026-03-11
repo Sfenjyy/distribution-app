@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Free Items Distribution — Collège des Apôtres</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://alcdn.msauth.net/browser/2.38.3/js/msal-browser.min.js"></script>
+<style>
+  :root {
+    --navy:   #0f2545;
+    --blue:   #1a56db;
+    --blue2:  #2563eb;
+    --sky:    #dbeafe;
+    --green:  #16a34a;
+    --green2: #dcfce7;
+    --red:    #dc2626;
+    --red2:   #fee2e2;
+    --amber:  #d97706;
+    --amber2: #fef3c7;
+    --gray0:  #f8fafc;
+    --gray1:  #f1f5f9;
+    --gray2:  #e2e8f0;
+    --gray3:  #cbd5e1;
+    --gray5:  #64748b;
+    --gray7:  #334155;
+    --gray9:  #0f172a;
+    --white:  #ffffff;
+    --radius: 12px;
+    --shadow: 0 4px 24px rgba(15,37,69,.10);
+    --shadow-lg: 0 8px 40px rgba(15,37,69,.16);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--gray0); color: var(--gray9); min-height: 100vh; }
+
+  /* ── LOGIN SCREEN ─────────────────────────────────────── */
+  #loginScreen {
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    background: linear-gradient(135deg, #0f2545 0%, #1a3a6e 100%);
+  }
+  .login-box {
+    background: var(--white); border-radius: 20px;
+    padding: 48px 40px; width: 380px;
+    box-shadow: 0 24px 80px rgba(0,0,0,.3);
+    text-align: center;
+  }
+  .login-logo { font-size: 48px; margin-bottom: 16px; }
+  .login-box h1 { font-size: 20px; font-weight: 700; color: var(--navy); margin-bottom: 6px; }
+  .login-box p  { font-size: 13px; color: var(--gray5); margin-bottom: 32px; }
+  .login-btn {
+    width: 100%; padding: 14px;
+    background: var(--blue2); color: #fff;
+    border: none; border-radius: 12px;
+    font-family: inherit; font-size: 15px; font-weight: 600;
+    cursor: pointer; display: flex; align-items: center;
+    justify-content: center; gap: 10px;
+    transition: background .15s, transform .1s;
+  }
+  .login-btn:hover { background: #1d4ed8; transform: translateY(-1px); }
+  .login-btn img { width: 20px; height: 20px; }
+  .login-error {
+    margin-top: 16px; padding: 10px 16px;
+    background: var(--red2); color: var(--red);
+    border-radius: 8px; font-size: 13px; display: none;
+  }
+
+  /* ── MAIN APP ─────────────────────────────────────────── */
+  #mainApp { display: none; }
+
+  header {
+    background: var(--navy); color: #fff;
+    padding: 0 32px; height: 58px;
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 100;
+    box-shadow: 0 2px 12px rgba(0,0,0,.25);
+  }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .brand .logo {
+    width: 34px; height: 34px; background: var(--blue2);
+    border-radius: 8px; display: grid; place-items: center; font-size: 18px;
+  }
+  .brand h1 { font-size: 15px; font-weight: 600; }
+  .brand span { font-size: 12px; color: #93c5fd; font-weight: 400; }
+  .header-right { display: flex; align-items: center; gap: 12px; }
+  .user-pill {
+    background: rgba(255,255,255,.1);
+    border: 1px solid rgba(255,255,255,.15);
+    color: #bfdbfe; padding: 5px 14px;
+    border-radius: 20px; font-size: 12px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .signout-btn {
+    background: rgba(255,255,255,.08);
+    border: 1px solid rgba(255,255,255,.15);
+    color: #fff; padding: 5px 12px;
+    border-radius: 8px; font-family: inherit;
+    font-size: 12px; cursor: pointer;
+    transition: background .15s;
+  }
+  .signout-btn:hover { background: rgba(255,255,255,.18); }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    gap: 24px; max-width: 1200px;
+    margin: 0 auto; padding: 24px 24px 60px;
+  }
+  @media(max-width:900px){ .layout { grid-template-columns:1fr; } }
+
+  .section-label {
+    font-size: 11px; font-weight: 600; letter-spacing: .08em;
+    text-transform: uppercase; color: var(--gray5); margin-bottom: 14px;
+  }
+
+  .family-card {
+    background: var(--white); border-radius: var(--radius);
+    padding: 20px 24px; box-shadow: var(--shadow);
+    margin-bottom: 24px; border: 1.5px solid var(--gray2);
+  }
+  .family-card .row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  label { display: block; font-size: 12px; font-weight: 600; color: var(--gray7); margin-bottom: 6px; }
+  input[type=text], input[type=date] {
+    width: 100%; padding: 9px 13px;
+    border: 1.5px solid var(--gray2); border-radius: 8px;
+    font-family: inherit; font-size: 14px; color: var(--gray9);
+    background: var(--gray0); outline: none; transition: border .15s;
+  }
+  input[type=text]:focus, input[type=date]:focus {
+    border-color: var(--blue2); background: #fff;
+    box-shadow: 0 0 0 3px rgba(37,99,235,.10);
+  }
+
+  .items-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 14px;
+  }
+  .item-card {
+    background: var(--white); border: 1.5px solid var(--gray2);
+    border-radius: var(--radius); padding: 18px 16px 14px;
+    cursor: pointer; transition: border .15s, box-shadow .15s, transform .1s;
+    position: relative; user-select: none;
+  }
+  .item-card:hover { border-color: var(--blue2); box-shadow: var(--shadow); transform: translateY(-1px); }
+  .item-card.in-cart { border-color: var(--blue2); background: #eff6ff; }
+  .item-card.out-of-stock { opacity: .45; cursor: not-allowed; pointer-events: none; }
+  .item-icon { font-size: 28px; margin-bottom: 10px; }
+  .item-name { font-size: 13px; font-weight: 600; color: var(--gray9); line-height: 1.35; margin-bottom: 6px; }
+  .item-stock { font-size: 11px; font-weight: 500; font-family: 'DM Mono', monospace; }
+  .item-stock.ok   { color: var(--green); }
+  .item-stock.low  { color: var(--amber); }
+  .item-stock.none { color: var(--red); }
+  .item-badge {
+    position: absolute; top: 10px; right: 10px;
+    background: var(--blue2); color: #fff;
+    width: 22px; height: 22px; border-radius: 50%;
+    display: none; place-items: center;
+    font-size: 11px; font-weight: 700; font-family: 'DM Mono', monospace;
+  }
+  .item-card.in-cart .item-badge { display: grid; }
+
+  .cart-panel { position: sticky; top: 78px; height: fit-content; }
+  .cart-box {
+    background: var(--white); border-radius: var(--radius);
+    box-shadow: var(--shadow-lg); border: 1.5px solid var(--gray2); overflow: hidden;
+  }
+  .cart-header {
+    background: var(--navy); color: #fff;
+    padding: 16px 20px; display: flex; align-items: center; justify-content: space-between;
+  }
+  .cart-header h2 { font-size: 14px; font-weight: 600; }
+  .cart-count {
+    background: var(--blue2); color: #fff;
+    width: 24px; height: 24px; border-radius: 50%;
+    display: grid; place-items: center; font-size: 12px; font-weight: 700;
+  }
+  .cart-body { padding: 16px 20px; min-height: 120px; }
+  .cart-empty { text-align: center; color: var(--gray5); padding: 28px 0; font-size: 13px; }
+  .cart-empty .icon { font-size: 32px; margin-bottom: 8px; }
+  .cart-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 0; border-bottom: 1px solid var(--gray1);
+  }
+  .cart-item:last-child { border-bottom: none; }
+  .cart-item-name { font-size: 13px; font-weight: 500; color: var(--gray9); flex: 1; }
+  .qty-ctrl {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--gray1); border-radius: 8px; padding: 3px 6px;
+  }
+  .qty-btn {
+    width: 24px; height: 24px; border: none;
+    background: var(--white); border-radius: 5px;
+    cursor: pointer; font-size: 15px; font-weight: 700;
+    color: var(--blue2); display: grid; place-items: center; transition: background .1s;
+  }
+  .qty-btn:hover { background: var(--sky); }
+  .qty-num { font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 600; min-width: 18px; text-align: center; }
+  .remove-btn {
+    background: none; border: none; cursor: pointer;
+    color: var(--gray3); font-size: 16px; margin-left: 8px;
+    line-height: 1; transition: color .1s;
+  }
+  .remove-btn:hover { color: var(--red); }
+  .cart-family {
+    background: var(--sky); border-radius: 8px; padding: 10px 14px;
+    margin-bottom: 14px; font-size: 12px; color: var(--navy);
+  }
+  .cart-family strong { font-size: 13px; display: block; margin-bottom: 2px; }
+  .confirm-btn {
+    width: 100%; padding: 13px; background: var(--green);
+    color: #fff; border: none; border-radius: 10px;
+    font-family: inherit; font-size: 14px; font-weight: 700;
+    cursor: pointer; transition: background .15s, transform .1s;
+    margin-top: 16px; letter-spacing: .02em;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .confirm-btn:hover:not(:disabled) { background: #15803d; transform: translateY(-1px); }
+  .confirm-btn:disabled { background: var(--gray3); cursor: not-allowed; }
+  .clear-btn {
+    width: 100%; padding: 9px; background: none; color: var(--gray5);
+    border: 1.5px solid var(--gray2); border-radius: 10px;
+    font-family: inherit; font-size: 13px; cursor: pointer;
+    margin-top: 8px; transition: all .15s;
+  }
+  .clear-btn:hover { border-color: var(--red); color: var(--red); }
+
+  /* saving spinner */
+  .spinner {
+    width: 16px; height: 16px;
+    border: 2px solid rgba(255,255,255,.3);
+    border-top-color: #fff; border-radius: 50%;
+    animation: spin .6s linear infinite; display: none;
+  }
+  .confirm-btn.saving .spinner { display: block; }
+  .confirm-btn.saving .btn-text { opacity: .7; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .log-panel {
+    background: var(--white); border-radius: var(--radius);
+    box-shadow: var(--shadow); border: 1.5px solid var(--gray2);
+    margin-top: 24px; overflow: hidden;
+  }
+  .log-header {
+    padding: 14px 20px; border-bottom: 1.5px solid var(--gray2);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .log-header h3 { font-size: 14px; font-weight: 600; }
+  .log-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .log-table th {
+    text-align: left; padding: 10px 16px; background: var(--gray1);
+    color: var(--gray5); font-size: 11px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: .06em;
+  }
+  .log-table td { padding: 10px 16px; border-top: 1px solid var(--gray1); color: var(--gray7); }
+  .log-table tr:hover td { background: var(--gray0); }
+  .log-table .tag {
+    display: inline-block; padding: 2px 8px; border-radius: 20px;
+    font-size: 11px; font-weight: 600; background: var(--sky); color: var(--blue2);
+  }
+  .log-empty { text-align: center; padding: 28px; color: var(--gray5); font-size: 13px; }
+
+  /* status bar */
+  .status-bar {
+    background: var(--amber2); border: 1px solid #fcd34d;
+    border-radius: 8px; padding: 10px 16px;
+    font-size: 12px; color: #92400e;
+    margin-bottom: 16px; display: none;
+    align-items: center; gap: 8px;
+  }
+  .status-bar.show { display: flex; }
+  .status-bar.success { background: var(--green2); border-color: #86efac; color: #14532d; }
+  .status-bar.error   { background: var(--red2);   border-color: #fca5a5; color: #7f1d1d; }
+
+  #toast {
+    position: fixed; bottom: 24px; left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--navy); color: #fff;
+    padding: 12px 24px; border-radius: 30px;
+    font-size: 13px; font-weight: 500;
+    box-shadow: var(--shadow-lg); z-index: 999;
+    transition: transform .3s cubic-bezier(.34,1.56,.64,1); white-space: nowrap;
+  }
+  #toast.show { transform: translateX(-50%) translateY(0); }
+
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(15,37,69,.5);
+    display: none; place-items: center; z-index: 200; backdrop-filter: blur(3px);
+  }
+  .modal-overlay.open { display: grid; }
+  .modal {
+    background: var(--white); border-radius: 16px; padding: 32px;
+    max-width: 460px; width: 90%; box-shadow: var(--shadow-lg);
+    animation: popIn .25s cubic-bezier(.34,1.56,.64,1);
+  }
+  @keyframes popIn { from { transform: scale(.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .modal h2 { font-size: 20px; margin-bottom: 6px; color: var(--navy); }
+  .modal p  { font-size: 13px; color: var(--gray5); margin-bottom: 20px; }
+  .modal-list { list-style: none; margin-bottom: 24px; }
+  .modal-list li {
+    display: flex; justify-content: space-between;
+    padding: 8px 0; border-bottom: 1px solid var(--gray1); font-size: 13px;
+  }
+  .modal-list li:last-child { border: none; }
+  .modal-list .qty-tag {
+    font-family: 'DM Mono', monospace; font-weight: 600;
+    background: var(--sky); color: var(--blue2);
+    padding: 1px 8px; border-radius: 12px; font-size: 12px;
+  }
+  .modal-actions { display: flex; gap: 12px; }
+  .modal-confirm {
+    flex: 1; padding: 11px; background: var(--green); color: #fff;
+    border: none; border-radius: 10px; font-family: inherit;
+    font-size: 14px; font-weight: 700; cursor: pointer;
+  }
+  .modal-cancel {
+    padding: 11px 20px; background: none;
+    border: 1.5px solid var(--gray2); border-radius: 10px;
+    font-family: inherit; font-size: 14px; cursor: pointer; color: var(--gray7);
+  }
+  .modal-cancel:hover { border-color: var(--red); color: var(--red); }
+</style>
+</head>
+<body>
+
+<!-- ── LOGIN SCREEN ──────────────────────────────────────────────────────── -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">🎁</div>
+    <h1>Free Items Distribution</h1>
+    <p>Collège des Apôtres<br>Sign in with your school account to continue</p>
+    <button class="login-btn" onclick="signIn()">
+      <svg width="20" height="20" viewBox="0 0 21 21" fill="none">
+        <rect width="10" height="10" fill="#F25022"/>
+        <rect x="11" width="10" height="10" fill="#7FBA00"/>
+        <rect y="11" width="10" height="10" fill="#00A4EF"/>
+        <rect x="11" y="11" width="10" height="10" fill="#FFB900"/>
+      </svg>
+      Sign in with Microsoft
+    </button>
+    <div class="login-error" id="loginError"></div>
+  </div>
+</div>
+
+<!-- ── MAIN APP ──────────────────────────────────────────────────────────── -->
+<div id="mainApp">
+  <header>
+    <div class="brand">
+      <div class="logo">🎁</div>
+      <div>
+        <h1>Free Items Distribution</h1>
+        <span>Collège des Apôtres</span>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="user-pill">👤 <span id="userEmail"></span></div>
+      <button class="signout-btn" onclick="signOut()">Sign out</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <div>
+      <!-- Status bar -->
+      <div class="status-bar" id="statusBar"></div>
+
+      <!-- Family Info -->
+      <div class="section-label">1 — Family Information</div>
+      <div class="family-card">
+        <div class="row">
+          <div>
+            <label>Student Name *</label>
+            <input type="text" id="studentName" placeholder="e.g. Khoury, Marc" autocomplete="off">
+          </div>
+          <div>
+            <label>Grade / Class *</label>
+            <input type="text" id="studentGrade" placeholder="e.g. Grade 1 - A" autocomplete="off">
+          </div>
+          <div>
+            <label>Parent / Guardian *</label>
+            <input type="text" id="parentName" placeholder="e.g. Mr. Joseph Khoury" autocomplete="off">
+          </div>
+        </div>
+      </div>
+
+      <!-- Items -->
+      <div class="section-label">2 — Select Items</div>
+      <div class="items-grid" id="itemsGrid"></div>
+
+      <!-- Today's Log -->
+      <div class="log-panel" style="margin-top:32px">
+        <div class="log-header">
+          <h3>📋 Today's Distributions</h3>
+        </div>
+        <div id="logBody">
+          <div class="log-empty">No distributions recorded yet this session.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cart -->
+    <div class="cart-panel">
+      <div class="section-label">3 — Cart</div>
+      <div class="cart-box">
+        <div class="cart-header">
+          <h2>🛒 Items to Give</h2>
+          <div class="cart-count" id="cartCount">0</div>
+        </div>
+        <div class="cart-body">
+          <div id="cartFamily" class="cart-family" style="display:none"></div>
+          <div id="cartItems">
+            <div class="cart-empty">
+              <div class="icon">📦</div>
+              <div>No items added yet.<br>Click an item card to add it.</div>
+            </div>
+          </div>
+        </div>
+        <div style="padding:0 20px 20px">
+          <button class="confirm-btn" id="confirmBtn" onclick="openModal()" disabled>
+            <span class="spinner"></span>
+            <span class="btn-text">✅ Confirm Distribution</span>
+          </button>
+          <button class="clear-btn" onclick="clearAll()">✕ Clear All</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <h2>Confirm Distribution</h2>
+    <p id="modalSubtitle"></p>
+    <ul class="modal-list" id="modalList"></ul>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeModal()">Cancel</button>
+      <button class="modal-confirm" onclick="confirmDistribution()">✅ Confirm & Save to Excel</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+// CONFIGURATION — do not change unless files move
+// ══════════════════════════════════════════════════════════════
+const CONFIG = {
+  clientId:    "46f9bee8-ce6c-4ea8-ac32-8c18ffaf7c5c",
+  tenantId:    "0ce223f6-3606-4192-bfe5-63440d708a7a",
+  siteHostname:"apotresedulb.sharepoint.com",
+  sitePath:    "/sites/SchoolOperations",
+  filePath:    "/Shared Documents/FreeItems_StockSystem.xlsx",
+  sheetName:   "Distributions",
+};
+
+// ══════════════════════════════════════════════════════════════
+// ITEMS — match names exactly to the Stock sheet
+// ══════════════════════════════════════════════════════════════
+const ITEMS = [
+  { id:1, name:"School Bag",           unit:"Piece", stock:100, icon:"🎒" },
+  { id:2, name:"Notebook Set (5 pcs)", unit:"Set",   stock:80,  icon:"📓" },
+  { id:3, name:"Pencil Case",          unit:"Piece", stock:80,  icon:"✏️"  },
+  { id:4, name:"Geometry Box",         unit:"Piece", stock:60,  icon:"📐" },
+  { id:5, name:"Water Bottle",         unit:"Piece", stock:100, icon:"🍶" },
+  { id:6, name:"Folder / Binder",      unit:"Piece", stock:50,  icon:"📁" },
+  { id:7, name:"USB Flash Drive",      unit:"Piece", stock:30,  icon:"💾" },
+  { id:8, name:"Coloring Kit",         unit:"Set",   stock:40,  icon:"🎨" },
+];
+
+// ══════════════════════════════════════════════════════════════
+// MSAL SETUP
+// ══════════════════════════════════════════════════════════════
+const msalConfig = {
+  auth: {
+    clientId: CONFIG.clientId,
+    authority: `https://login.microsoftonline.com/${CONFIG.tenantId}`,
+    redirectUri: "http://localhost",
+  },
+  cache: { cacheLocation: "sessionStorage" }
+};
+let msalInstance = null;
+const scopes = ["Files.ReadWrite", "Sites.ReadWrite.All", "User.Read"];
+
+let accessToken = null;
+let driveItemId = null;
+let sessionLog  = [];
+let cart = {};
+
+// ══════════════════════════════════════════════════════════════
+// AUTH
+// ══════════════════════════════════════════════════════════════
+async function init() {
+  // Disable sign in button until MSAL is ready
+  const loginBtn = document.querySelector(".login-btn");
+  if (loginBtn) { loginBtn.disabled = true; loginBtn.textContent = "Loading..."; }
+
+  msalInstance = new msal.PublicClientApplication(msalConfig);
+  await msalInstance.initialize();
+
+  if (loginBtn) {
+    loginBtn.disabled = false;
+    loginBtn.innerHTML = `<svg width="20" height="20" viewBox="0 0 21 21" fill="none">
+      <rect width="10" height="10" fill="#F25022"/>
+      <rect x="11" width="10" height="10" fill="#7FBA00"/>
+      <rect y="11" width="10" height="10" fill="#00A4EF"/>
+      <rect x="11" y="11" width="10" height="10" fill="#FFB900"/>
+    </svg> Sign in with Microsoft`;
+  }
+
+  const resp = await msalInstance.handleRedirectPromise();
+  if (resp) {
+    accessToken = resp.accessToken;
+    showApp(resp.account);
+  } else {
+    const accounts = msalInstance.getAllAccounts();
+    if (accounts.length > 0) {
+      try {
+        const silent = await msalInstance.acquireTokenSilent({ scopes, account: accounts[0] });
+        accessToken = silent.accessToken;
+        showApp(accounts[0]);
+      } catch { showLogin(); }
+    } else { showLogin(); }
+  }
+}
+
+async function signIn() {
+  try {
+    await msalInstance.loginRedirect({ scopes });
+  } catch(e) {
+    document.getElementById("loginError").style.display = "block";
+    document.getElementById("loginError").textContent = "Login failed: " + e.message;
+  }
+}
+
+function signOut() {
+  msalInstance.logoutRedirect();
+}
+
+function showLogin() {
+  document.getElementById("loginScreen").style.display = "flex";
+  document.getElementById("mainApp").style.display = "none";
+}
+
+function showApp(account) {
+  document.getElementById("loginScreen").style.display = "none";
+  document.getElementById("mainApp").style.display = "block";
+  document.getElementById("userEmail").textContent = account.username || account.name;
+  renderItems();
+  renderCart();
+}
+
+// ══════════════════════════════════════════════════════════════
+// GRAPH API HELPERS
+// ══════════════════════════════════════════════════════════════
+async function graphGet(url) {
+  const r = await fetch(`https://graph.microsoft.com/v1.0${url}`, {
+    headers: { Authorization: `Bearer ${accessToken}` }
+  });
+  if (!r.ok) throw new Error(`Graph GET failed: ${r.status} ${await r.text()}`);
+  return r.json();
+}
+
+async function graphPost(url, body) {
+  const r = await fetch(`https://graph.microsoft.com/v1.0${url}`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
+    body: JSON.stringify(body)
+  });
+  if (!r.ok) throw new Error(`Graph POST failed: ${r.status} ${await r.text()}`);
+  return r.json();
+}
+
+// Get the SharePoint drive item ID for our Excel file (cached)
+async function getDriveItemId() {
+  if (driveItemId) return driveItemId;
+  const site = await graphGet(`/sites/${CONFIG.siteHostname}:${CONFIG.sitePath}`);
+  const siteId = site.id;
+  const item = await graphGet(`/sites/${siteId}/drive/root:${CONFIG.filePath}`);
+  driveItemId = { siteId, itemId: item.id };
+  return driveItemId;
+}
+
+// Find the next empty row in the Distributions sheet
+async function getNextEmptyRow() {
+  const { siteId, itemId } = await getDriveItemId();
+  // Read column D (Student Name) from row 3 down to find last used row
+  const range = await graphGet(
+    `/sites/${siteId}/drives/${await getDriveId(siteId)}/items/${itemId}/workbook/worksheets('${CONFIG.sheetName}')/usedRange`
+  );
+  return (range.rowCount || 2) + 1; // next row after used range
+}
+
+async function getDriveId(siteId) {
+  if (window._driveId) return window._driveId;
+  const drive = await graphGet(`/sites/${siteId}/drive`);
+  window._driveId = drive.id;
+  return drive.id;
+}
+
+// Append rows to Distributions sheet
+async function appendRowsToExcel(rows) {
+  const { siteId, itemId } = await getDriveItemId();
+  const driveId = await getDriveId(siteId);
+
+  // Get used range to find next empty row
+  let nextRow = 3;
+  try {
+    const used = await graphGet(
+      `/sites/${siteId}/drives/${driveId}/items/${itemId}/workbook/worksheets('${CONFIG.sheetName}')/usedRange`
+    );
+    nextRow = (used.rowCount || 2) + 1;
+    if (nextRow < 3) nextRow = 3;
+  } catch { nextRow = 3; }
+
+  // Write each row
+  for (let i = 0; i < rows.length; i++) {
+    const r = nextRow + i;
+    const rowData = rows[i];
+    // Address: A{r}:I{r}
+    await fetch(
+      `https://graph.microsoft.com/v1.0/sites/${siteId}/drives/${driveId}/items/${itemId}/workbook/worksheets('${CONFIG.sheetName}')/range(address='A${r}:I${r}')`,
+      {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ values: [rowData] })
+      }
+    );
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// UI — ITEMS
+// ══════════════════════════════════════════════════════════════
+function renderItems() {
+  const grid = document.getElementById("itemsGrid");
+  grid.innerHTML = "";
+  ITEMS.forEach(item => {
+    const given = sessionLog.filter(r => r.itemId === item.id).reduce((s,r)=>s+r.qty, 0);
+    const rem   = item.stock - given;
+    const inCart = !!cart[item.id];
+    const oos    = rem <= 0;
+    const low    = !oos && rem / item.stock < 0.2;
+    const sc     = oos ? "none" : low ? "low" : "ok";
+    const st     = oos ? "Out of stock" : `${rem} remaining`;
+    const card   = document.createElement("div");
+    card.className = `item-card${inCart?" in-cart":""}${oos?" out-of-stock":""}`;
+    card.innerHTML = `
+      <div class="item-badge">${cart[item.id]||""}</div>
+      <div class="item-icon">${item.icon}</div>
+      <div class="item-name">${item.name}</div>
+      <div class="item-stock ${sc}">${st}</div>`;
+    if (!oos) card.onclick = () => toggleItem(item.id);
+    grid.appendChild(card);
+  });
+}
+
+function toggleItem(id) {
+  if (cart[id]) delete cart[id];
+  else cart[id] = 1;
+  renderCart(); renderItems();
+}
+
+function changeQty(id, delta) {
+  const item  = ITEMS.find(i=>i.id===id);
+  const given = sessionLog.filter(r=>r.itemId===id).reduce((s,r)=>s+r.qty,0);
+  const rem   = item.stock - given;
+  cart[id]    = Math.max(1, Math.min(rem, (cart[id]||1) + delta));
+  renderCart(); renderItems();
+}
+
+function removeFromCart(id) {
+  delete cart[id]; renderCart(); renderItems();
+}
+
+function renderCart() {
+  const ids = Object.keys(cart);
+  document.getElementById("cartCount").textContent = ids.length;
+
+  const sn = document.getElementById("studentName").value.trim();
+  const pn = document.getElementById("parentName").value.trim();
+  const famDiv = document.getElementById("cartFamily");
+  if (sn || pn) {
+    famDiv.style.display = "block";
+    famDiv.innerHTML = `<strong>👨‍👩‍👧 ${sn||"—"}</strong>${pn ? "Parent: "+pn : ""}`;
+  } else { famDiv.style.display = "none"; }
+
+  const container = document.getElementById("cartItems");
+  if (!ids.length) {
+    container.innerHTML = `<div class="cart-empty"><div class="icon">📦</div><div>No items added yet.<br>Click an item card to add it.</div></div>`;
+  } else {
+    container.innerHTML = ids.map(id => {
+      const item = ITEMS.find(i=>i.id==id);
+      return `<div class="cart-item">
+        <div class="cart-item-name">${item.icon} ${item.name}</div>
+        <div class="qty-ctrl">
+          <button class="qty-btn" onclick="changeQty(${id},-1)">−</button>
+          <span class="qty-num">${cart[id]}</span>
+          <button class="qty-btn" onclick="changeQty(${id},+1)">+</button>
+        </div>
+        <button class="remove-btn" onclick="removeFromCart(${id})" title="Remove">×</button>
+      </div>`;
+    }).join("");
+  }
+
+  const ready = ids.length > 0
+    && document.getElementById("studentName").value.trim()
+    && document.getElementById("studentGrade").value.trim()
+    && document.getElementById("parentName").value.trim();
+  document.getElementById("confirmBtn").disabled = !ready;
+}
+
+["studentName","studentGrade","parentName"].forEach(id =>
+  document.getElementById(id).addEventListener("input", renderCart)
+);
+
+// ══════════════════════════════════════════════════════════════
+// MODAL
+// ══════════════════════════════════════════════════════════════
+function openModal() {
+  const sn = document.getElementById("studentName").value.trim();
+  const sg = document.getElementById("studentGrade").value.trim();
+  const pn = document.getElementById("parentName").value.trim();
+  document.getElementById("modalSubtitle").textContent =
+    `Student: ${sn} · ${sg} · Parent: ${pn}`;
+  document.getElementById("modalList").innerHTML = Object.keys(cart).map(id => {
+    const item = ITEMS.find(i=>i.id==id);
+    return `<li><span>${item.icon} ${item.name}</span><span class="qty-tag">× ${cart[id]}</span></li>`;
+  }).join("");
+  document.getElementById("modalOverlay").classList.add("open");
+}
+
+function closeModal() {
+  document.getElementById("modalOverlay").classList.remove("open");
+}
+
+// ══════════════════════════════════════════════════════════════
+// CONFIRM — writes to Excel via Graph API
+// ══════════════════════════════════════════════════════════════
+async function confirmDistribution() {
+  closeModal();
+  const sn   = document.getElementById("studentName").value.trim();
+  const sg   = document.getElementById("studentGrade").value.trim();
+  const pn   = document.getElementById("parentName").value.trim();
+  const date = new Date().toLocaleDateString("en-GB");
+
+  const btn = document.getElementById("confirmBtn");
+  btn.classList.add("saving");
+  btn.disabled = true;
+  showStatus("⏳ Saving to Excel...", "warning");
+
+  // Build rows for Excel (columns A–I matching the Distributions sheet)
+  const rows = Object.keys(cart).map(id => {
+    const item = ITEMS.find(i=>i.id==id);
+    return [
+      "",           // A: # (auto-calculated by formula)
+      date,         // B: Date
+      item.name,    // C: Item Given
+      sn,           // D: Student Name
+      sg,           // E: Grade / Class
+      pn,           // F: Parent / Guardian
+      cart[id],     // G: Qty Given
+      "",           // H: Received By (signature — left blank)
+      ""            // I: Notes
+    ];
+  });
+
+  try {
+    await appendRowsToExcel(rows);
+
+    // Update session log
+    Object.keys(cart).forEach(id => {
+      const item = ITEMS.find(i=>i.id==id);
+      sessionLog.push({ date, itemId:+id, itemName:item.name, student:sn, grade:sg, parent:pn, qty:cart[id] });
+    });
+
+    cart = {};
+    clearFamily();
+    renderItems();
+    renderCart();
+    renderLog();
+    showStatus(`✅ Saved to Excel — ${sn} · ${rows.length} item(s) recorded`, "success");
+    showToast(`✅ Distribution recorded for ${sn}`);
+  } catch(e) {
+    console.error(e);
+    showStatus("❌ Failed to save: " + e.message, "error");
+    showToast("❌ Save failed — check console");
+  } finally {
+    btn.classList.remove("saving");
+    btn.disabled = false;
+  }
+}
+
+function clearFamily() {
+  document.getElementById("studentName").value  = "";
+  document.getElementById("studentGrade").value = "";
+  document.getElementById("parentName").value   = "";
+}
+
+function clearAll() {
+  cart = {}; clearFamily(); renderItems(); renderCart();
+}
+
+function renderLog() {
+  const body = document.getElementById("logBody");
+  if (!sessionLog.length) {
+    body.innerHTML = `<div class="log-empty">No distributions recorded yet this session.</div>`;
+    return;
+  }
+  body.innerHTML = `<table class="log-table">
+    <thead><tr><th>#</th><th>Date</th><th>Item</th><th>Student</th><th>Grade</th><th>Parent</th><th>Qty</th></tr></thead>
+    <tbody>${sessionLog.map((r,i)=>`<tr>
+      <td>${i+1}</td><td>${r.date}</td>
+      <td><span class="tag">${r.itemName}</span></td>
+      <td>${r.student}</td><td>${r.grade}</td><td>${r.parent}</td>
+      <td style="font-family:'DM Mono',monospace;font-weight:600">${r.qty}</td>
+    </tr>`).join("")}</tbody>
+  </table>`;
+}
+
+function showStatus(msg, type="warning") {
+  const bar = document.getElementById("statusBar");
+  bar.textContent = msg;
+  bar.className = `status-bar show ${type}`;
+  if (type === "success") setTimeout(() => bar.classList.remove("show"), 5000);
+}
+
+function showToast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 3000);
+}
+
+// ══════════════════════════════════════════════════════════════
+init();
+</script>
+</body>
+</html>
