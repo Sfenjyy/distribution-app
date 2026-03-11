@@ -198,26 +198,28 @@ let sortCol = "dateRaw", sortDir = -1;
 // Convert Excel serial date OR string date to readable format
 function excelDateToString(val) {
   if (!val && val !== 0) return "";
-  // ISO string like "2026-03-11"
-  if (typeof val === "string" && val.includes("-")) {
-    const parts = val.split("-");
-    // Could be YYYY-MM-DD or DD-MM-YYYY
-    if (parts[0].length === 4) {
-      // YYYY-MM-DD → DD/MM/YYYY
-      return `${parts[2]}/${parts[1]}/${parts[0]}`;
-    }
-    return val;
+
+  // Excel serial number (e.g. 46329)
+  if (typeof val === "number" || (typeof val === "string" && !isNaN(Number(val)) && !String(val).includes("-") && !String(val).includes("/"))) {
+    const serial = Number(val);
+    if (!serial || serial < 1) return "";
+    const d = new Date(Math.round((serial - 25569) * 86400 * 1000));
+    const day   = String(d.getUTCDate()).padStart(2,"0");
+    const month = String(d.getUTCMonth()+1).padStart(2,"0");
+    const year  = d.getUTCFullYear();
+    return `${day}/${month}/${year}`;
   }
-  // Already DD/MM/YYYY string
-  if (typeof val === "string" && isNaN(Number(val))) return val;
-  // Excel serial number
-  const serial = Number(val);
-  if (!serial || serial < 1) return "";
-  const d = new Date(Math.round((serial - 25569) * 86400 * 1000));
-  const day   = String(d.getUTCDate()).padStart(2,"0");
-  const month = String(d.getUTCMonth()+1).padStart(2,"0");
-  const year  = d.getUTCFullYear();
-  return `${day}/${month}/${year}`;
+
+  const s = String(val);
+
+  // ISO format YYYY-MM-DD → DD/MM/YYYY
+  if (/^\d{4}-\d{2}-\d{2}/.test(s)) {
+    const [y, m, d] = s.slice(0,10).split("-");
+    return `${d}/${m}/${y}`;
+  }
+
+  // Already DD/MM/YYYY or similar — return as-is
+  return s;
 }
 
 function excelSerial(dateStr) {
@@ -298,12 +300,15 @@ async function loadData() {
       name:r[0], unit:r[1], initial:Number(r[2])||0, given:Number(r[3])||0, remain:Number(r[4])||0
     }));
 
-    allRows = (distData.values||[]).filter(r=>r[2]&&r[2]!=="").map(r=>({
-      date:    excelDateToString(r[0]),
-      dateRaw: typeof r[0]==="string" && r[0].includes("-") ? r[0] : (Number(r[0]) ? new Date(Math.round((Number(r[0])-25569)*86400*1000)).toISOString().slice(0,10) : ""),
-      item:    r[1]||"", student:r[2]||"", grade:r[3]||"",
-      parent:  r[4]||"", qty:Number(r[5])||1, notes:r[7]||""
-    }));
+    allRows = (distData.values||[]).filter(r=>r[2]&&r[2]!=="").map(r=>{
+      console.log("RAW DATE:", r[0], typeof r[0]);
+      return {
+        date:    excelDateToString(r[0]),
+        dateRaw: typeof r[0]==="string" && r[0].includes("-") ? r[0] : (Number(r[0]) ? new Date(Math.round((Number(r[0])-25569)*86400*1000)).toISOString().slice(0,10) : ""),
+        item:    r[1]||"", student:r[2]||"", grade:r[3]||"",
+        parent:  r[4]||"", qty:Number(r[5])||1, notes:r[7]||""
+      };
+    });
 
     renderStats(); renderStock(); renderItemSummary(); applyFilters();
   } catch(e) {
