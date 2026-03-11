@@ -755,7 +755,7 @@ async function confirmDistribution() {
   const sg   = document.getElementById("studentGrade").value.trim();
   const pn   = document.getElementById("parentName").value.trim();
   const now  = new Date();
-  const date = `${String(now.getDate()).padStart(2,"0")}/${String(now.getMonth()+1).padStart(2,"0")}/${now.getFullYear()}`;
+  const date = Math.floor((now - new Date(Date.UTC(1899, 11, 30))) / 86400000);
 
   const btn = document.getElementById("confirmBtn");
   btn.classList.add("saving");
