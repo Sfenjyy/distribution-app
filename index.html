@@ -560,9 +560,12 @@ function showLogin() {
 function showApp(account) {
   document.getElementById("loginScreen").style.display = "none";
   document.getElementById("mainApp").style.display = "block";
-  document.getElementById("userEmail").textContent = account.username || account.name;
-  renderItems();
-  renderCart();
+  const emailEl = document.getElementById("userEmail");
+  if (emailEl) emailEl.textContent = account.username || account.name;
+  setTimeout(() => {
+    renderItems();
+    renderCart();
+  }, 50);
 }
 
 // ══════════════════════════════════════════════════════════════
