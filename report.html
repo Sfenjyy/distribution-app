@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Distribution Report — Collège des Apôtres</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script type="text/javascript" src="https://alcdn.msauth.net/browser/2.35.0/js/msal-browser.min.js"></script>
 <script type="text/javascript">
   if (typeof msal === 'undefined') {
@@ -13,291 +13,209 @@
 </script>
 <style>
   :root {
-    --navy:  #0f2545; --blue: #2563eb; --sky: #dbeafe;
+    --navy: #0f2545; --blue: #2563eb; --sky: #dbeafe;
     --green: #16a34a; --green2: #dcfce7;
-    --red:   #dc2626; --red2: #fee2e2;
     --amber: #d97706; --amber2: #fef3c7;
+    --red: #dc2626; --red2: #fee2e2;
     --gray0: #f8fafc; --gray1: #f1f5f9; --gray2: #e2e8f0;
-    --gray3: #cbd5e1; --gray5: #64748b; --gray7: #334155; --gray9: #0f172a;
-    --white: #ffffff;
-    --radius: 12px;
-    --shadow: 0 4px 24px rgba(15,37,69,.10);
+    --gray5: #64748b; --gray7: #334155; --gray9: #0f172a;
+    --white: #fff; --radius: 10px;
+    --shadow: 0 2px 12px rgba(15,37,69,.08);
   }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'DM Sans', sans-serif; background: var(--gray0); color: var(--gray9); min-height: 100vh; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--gray0); color: var(--gray9); }
 
-  /* LOGIN */
   #loginScreen {
-    min-height: 100vh; display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    background: linear-gradient(135deg, #0f2545 0%, #1a3a6e 100%);
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, #0f2545, #1a3a6e);
   }
   .login-box {
-    background: var(--white); border-radius: 20px; padding: 48px 40px;
-    width: 380px; box-shadow: 0 24px 80px rgba(0,0,0,.3); text-align: center;
+    background: #fff; border-radius: 16px; padding: 40px; width: 360px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.25); text-align: center;
   }
-  .login-logo { font-size: 48px; margin-bottom: 16px; }
-  .login-box h1 { font-size: 20px; font-weight: 700; color: var(--navy); margin-bottom: 6px; }
-  .login-box p  { font-size: 13px; color: var(--gray5); margin-bottom: 32px; }
-  .login-btn {
-    width: 100%; padding: 14px; background: var(--blue); color: #fff;
-    border: none; border-radius: 12px; font-family: inherit;
-    font-size: 15px; font-weight: 600; cursor: pointer;
-    display: flex; align-items: center; justify-content: center; gap: 10px;
-    transition: background .15s;
+  .login-box .icon { font-size: 40px; margin-bottom: 12px; }
+  .login-box h1 { font-size: 18px; font-weight: 700; color: var(--navy); margin-bottom: 4px; }
+  .login-box p  { font-size: 13px; color: var(--gray5); margin-bottom: 28px; }
+  .ms-btn {
+    width: 100%; padding: 12px; background: var(--blue); color: #fff;
+    border: none; border-radius: 10px; font-family: inherit; font-size: 14px;
+    font-weight: 600; cursor: pointer; display: flex; align-items: center;
+    justify-content: center; gap: 8px; transition: background .15s;
   }
-  .login-btn:hover { background: #1d4ed8; }
-  .login-btn:disabled { background: var(--gray3); cursor: not-allowed; }
+  .ms-btn:hover { background: #1d4ed8; }
+  .ms-btn:disabled { background: var(--gray2); color: var(--gray5); cursor: not-allowed; }
 
-  /* HEADER */
   #mainApp { display: none; }
   header {
-    background: var(--navy); color: #fff; padding: 0 32px; height: 58px;
+    background: var(--navy); color: #fff; height: 54px; padding: 0 28px;
     display: flex; align-items: center; justify-content: space-between;
-    position: sticky; top: 0; z-index: 100;
-    box-shadow: 0 2px 12px rgba(0,0,0,.25);
+    position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,.2);
   }
-  .brand { display: flex; align-items: center; gap: 12px; }
-  .brand .logo { width: 34px; height: 34px; background: var(--blue); border-radius: 8px; display: grid; place-items: center; font-size: 18px; }
-  .brand h1 { font-size: 15px; font-weight: 600; }
-  .brand span { font-size: 12px; color: #93c5fd; }
-  .header-right { display: flex; align-items: center; gap: 12px; }
-  .nav-link {
-    background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.15);
-    color: #bfdbfe; padding: 5px 14px; border-radius: 8px;
+  .brand { display: flex; align-items: center; gap: 10px; }
+  .brand h1 { font-size: 14px; font-weight: 600; }
+  .brand span { font-size: 11px; color: #93c5fd; }
+  .hdr-right { display: flex; align-items: center; gap: 8px; }
+  .hdr-btn {
+    background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.15);
+    color: #bfdbfe; padding: 4px 12px; border-radius: 6px;
     font-family: inherit; font-size: 12px; cursor: pointer; text-decoration: none;
     transition: background .15s;
   }
-  .nav-link:hover { background: rgba(255,255,255,.18); color: #fff; }
-  .user-pill {
-    background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.15);
-    color: #bfdbfe; padding: 5px 14px; border-radius: 20px; font-size: 12px;
-  }
-  .signout-btn {
-    background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.15);
-    color: #fff; padding: 5px 12px; border-radius: 8px;
-    font-family: inherit; font-size: 12px; cursor: pointer;
-  }
+  .hdr-btn:hover { background: rgba(255,255,255,.2); color: #fff; }
 
-  /* LAYOUT */
-  .page { max-width: 1200px; margin: 0 auto; padding: 28px 24px 60px; }
+  .page { max-width: 1100px; margin: 0 auto; padding: 24px 20px 60px; }
 
-  /* TOOLBAR */
-  .toolbar {
-    display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 24px; flex-wrap: wrap; gap: 12px;
+  .controls {
+    display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; align-items: center;
   }
-  .toolbar h2 { font-size: 20px; font-weight: 700; color: var(--navy); }
-  .toolbar-right { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-  .filter-input {
-    padding: 8px 14px; border: 1.5px solid var(--gray2); border-radius: 8px;
-    font-family: inherit; font-size: 13px; color: var(--gray9);
-    background: var(--white); outline: none; width: 200px;
+  .controls h2 { font-size: 17px; font-weight: 700; color: var(--navy); flex: 1; }
+  input[type=text], input[type=date] {
+    padding: 7px 12px; border: 1.5px solid var(--gray2); border-radius: 8px;
+    font-family: inherit; font-size: 13px; background: #fff; outline: none;
   }
-  .filter-input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37,99,235,.1); }
-  .btn {
-    padding: 8px 16px; border-radius: 8px; font-family: inherit;
-    font-size: 13px; font-weight: 600; cursor: pointer; border: none;
-    transition: all .15s;
-  }
-  .btn-primary { background: var(--navy); color: #fff; }
-  .btn-primary:hover { background: var(--blue); }
-  .btn-outline { background: none; border: 1.5px solid var(--gray2); color: var(--gray7); }
-  .btn-outline:hover { border-color: var(--navy); color: var(--navy); }
+  input[type=text]:focus, input[type=date]:focus { border-color: var(--blue); }
+  input[type=text] { width: 200px; }
+  input[type=date] { width: 140px; }
+  .btn { padding: 7px 14px; border-radius: 8px; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; border: none; }
+  .btn-dark  { background: var(--navy); color: #fff; }
+  .btn-dark:hover { background: var(--blue); }
+  .btn-ghost { background: none; border: 1.5px solid var(--gray2); color: var(--gray7); }
+  .btn-ghost:hover { border-color: var(--navy); color: var(--navy); }
 
-  /* STAT CARDS */
-  .stats-grid {
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 16px; margin-bottom: 28px;
-  }
-  .stat-card {
-    background: var(--white); border-radius: var(--radius);
-    padding: 20px; box-shadow: var(--shadow);
-    border: 1.5px solid var(--gray2);
-  }
-  .stat-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--gray5); margin-bottom: 8px; }
-  .stat-value { font-size: 32px; font-weight: 700; color: var(--navy); font-family: 'DM Mono', monospace; }
-  .stat-sub { font-size: 12px; color: var(--gray5); margin-top: 4px; }
+  .stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 22px; }
+  @media(max-width:700px){ .stats { grid-template-columns: repeat(2,1fr); } }
+  .stat { background: #fff; border-radius: var(--radius); padding: 16px 18px; border: 1.5px solid var(--gray2); }
+  .stat-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--gray5); margin-bottom: 6px; }
+  .stat-val   { font-size: 28px; font-weight: 700; color: var(--navy); font-family: 'DM Mono', monospace; }
+  .stat-sub   { font-size: 11px; color: var(--gray5); margin-top: 2px; }
 
-  /* STOCK BAR */
-  .stock-section { margin-bottom: 28px; }
-  .section-title { font-size: 13px; font-weight: 700; color: var(--navy); margin-bottom: 14px; text-transform: uppercase; letter-spacing: .05em; }
-  .stock-item {
-    background: var(--white); border-radius: 10px; padding: 14px 18px;
-    margin-bottom: 10px; box-shadow: var(--shadow);
-    border: 1.5px solid var(--gray2);
-  }
-  .stock-item-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-  .stock-item-name { font-size: 13px; font-weight: 600; }
-  .stock-item-nums { font-size: 12px; color: var(--gray5); font-family: 'DM Mono', monospace; }
-  .progress-bar { height: 8px; background: var(--gray1); border-radius: 4px; overflow: hidden; }
-  .progress-fill { height: 100%; border-radius: 4px; transition: width .4s ease; }
-  .progress-fill.ok   { background: var(--green); }
-  .progress-fill.low  { background: var(--amber); }
-  .progress-fill.none { background: var(--red); }
-  .stock-badge {
-    font-size: 11px; font-weight: 600; padding: 2px 10px; border-radius: 20px;
-  }
-  .badge-ok   { background: var(--green2); color: var(--green); }
-  .badge-low  { background: var(--amber2); color: var(--amber); }
-  .badge-none { background: var(--red2);   color: var(--red);   }
+  .section-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--gray5); margin-bottom: 10px; }
+  .stock-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px,1fr)); gap: 10px; margin-bottom: 22px; }
+  .stock-card { background: #fff; border-radius: var(--radius); padding: 14px 16px; border: 1.5px solid var(--gray2); }
+  .stock-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .stock-name { font-size: 13px; font-weight: 600; }
+  .stock-nums { font-size: 11px; color: var(--gray5); font-family: 'DM Mono', monospace; margin-bottom: 6px; }
+  .bar { height: 6px; background: var(--gray1); border-radius: 3px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 3px; }
+  .bar-fill.ok   { background: var(--green); }
+  .bar-fill.low  { background: var(--amber); }
+  .bar-fill.none { background: var(--red); }
+  .badge { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 20px; }
+  .badge.ok   { background: var(--green2); color: var(--green); }
+  .badge.low  { background: var(--amber2); color: var(--amber); }
+  .badge.none { background: var(--red2);   color: var(--red);   }
 
-  /* TABLE */
-  .table-section {
-    background: var(--white); border-radius: var(--radius);
-    box-shadow: var(--shadow); border: 1.5px solid var(--gray2); overflow: hidden;
-  }
-  .table-header {
-    padding: 16px 20px; border-bottom: 1.5px solid var(--gray2);
-    display: flex; align-items: center; justify-content: space-between;
-  }
-  .table-header h3 { font-size: 14px; font-weight: 600; }
-  .record-count { font-size: 12px; color: var(--gray5); }
-  table { width: 100%; border-collapse: collapse; font-size: 12px; }
-  th {
-    text-align: left; padding: 10px 16px; background: var(--gray1);
-    color: var(--gray5); font-size: 11px; font-weight: 600;
-    text-transform: uppercase; letter-spacing: .06em;
-    cursor: pointer; user-select: none;
-  }
+  .card { background: #fff; border-radius: var(--radius); border: 1.5px solid var(--gray2); overflow: hidden; margin-bottom: 20px; }
+  .card-header { padding: 12px 16px; border-bottom: 1px solid var(--gray2); display: flex; align-items: center; justify-content: space-between; }
+  .card-header h3 { font-size: 13px; font-weight: 700; }
+  .card-header span { font-size: 11px; color: var(--gray5); }
+  table { width: 100%; border-collapse: collapse; }
+  th { padding: 8px 14px; background: var(--gray1); text-align: left; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--gray5); cursor: pointer; }
   th:hover { background: var(--gray2); }
-  td { padding: 10px 16px; border-top: 1px solid var(--gray1); color: var(--gray7); }
+  td { padding: 8px 14px; border-top: 1px solid var(--gray1); font-size: 12px; color: var(--gray7); }
   tr:hover td { background: var(--gray0); }
-  .tag {
-    display: inline-block; padding: 2px 10px; border-radius: 20px;
-    font-size: 11px; font-weight: 600; background: var(--sky); color: var(--blue);
-  }
-  .qty-badge {
-    font-family: 'DM Mono', monospace; font-weight: 700;
-    background: var(--navy); color: #fff;
-    padding: 2px 8px; border-radius: 6px; font-size: 11px;
-  }
-
-  /* LOADING */
-  .loading {
-    text-align: center; padding: 60px 20px; color: var(--gray5);
-  }
-  .spinner-lg {
-    width: 40px; height: 40px; margin: 0 auto 16px;
-    border: 3px solid var(--gray2); border-top-color: var(--blue);
-    border-radius: 50%; animation: spin .7s linear infinite;
-  }
+  .tag { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 600; background: var(--sky); color: var(--blue); }
+  .num { font-family: 'DM Mono', monospace; font-weight: 600; font-size: 12px; }
+  .spinner { width: 28px; height: 28px; border: 3px solid var(--gray2); border-top-color: var(--blue); border-radius: 50%; animation: spin .7s linear infinite; margin: 28px auto; }
   @keyframes spin { to { transform: rotate(360deg); } }
-  .empty-state { text-align: center; padding: 40px; color: var(--gray5); font-size: 13px; }
-
-  /* PRINT */
-  @media print {
-    header, .toolbar .btn, .toolbar .filter-input, .nav-link, .signout-btn { display: none !important; }
-    .page { padding: 0; }
-    body { background: white; }
-  }
+  .empty { text-align: center; padding: 28px; color: var(--gray5); font-size: 13px; }
+  @media print { header, .controls .btn, .controls input { display: none !important; } }
 </style>
 </head>
 <body>
 
-<!-- LOGIN -->
 <div id="loginScreen">
   <div class="login-box">
-    <div class="login-logo">📊</div>
+    <div class="icon">📊</div>
     <h1>Distribution Report</h1>
-    <p>Collège des Apôtres<br>Sign in to view the report</p>
-    <button class="login-btn" id="loginBtn" onclick="signIn()">
-      <svg width="20" height="20" viewBox="0 0 21 21" fill="none">
-        <rect width="10" height="10" fill="#F25022"/>
-        <rect x="11" width="10" height="10" fill="#7FBA00"/>
-        <rect y="11" width="10" height="10" fill="#00A4EF"/>
-        <rect x="11" y="11" width="10" height="10" fill="#FFB900"/>
-      </svg>
-      Sign in with Microsoft
+    <p>Collège des Apôtres</p>
+    <button class="ms-btn" id="loginBtn" onclick="signIn()">
+      <svg width="18" height="18" viewBox="0 0 21 21" fill="none">
+        <rect width="10" height="10" fill="#F25022"/><rect x="11" width="10" height="10" fill="#7FBA00"/>
+        <rect y="11" width="10" height="10" fill="#00A4EF"/><rect x="11" y="11" width="10" height="10" fill="#FFB900"/>
+      </svg>Sign in with Microsoft
     </button>
   </div>
 </div>
 
-<!-- MAIN APP -->
 <div id="mainApp">
   <header>
     <div class="brand">
-      <div class="logo">📊</div>
-      <div>
-        <h1>Distribution Report</h1>
-        <span>Collège des Apôtres</span>
-      </div>
+      <div><h1>📊 Distribution Report</h1><span>Collège des Apôtres</span></div>
     </div>
-    <div class="header-right">
-      <a class="nav-link" href="index.html">🎁 Distribution App</a>
-      <div class="user-pill">👤 <span id="userEmail"></span></div>
-      <button class="signout-btn" onclick="signOut()">Sign out</button>
+    <div class="hdr-right">
+      <a class="hdr-btn" href="index.html">🎁 App</a>
+      <span class="hdr-btn" style="cursor:default">👤 <span id="userEmail"></span></span>
+      <button class="hdr-btn" onclick="signOut()">Sign out</button>
     </div>
   </header>
 
   <div class="page">
-    <div class="toolbar">
-      <h2>📋 Items Distribution Report</h2>
-      <div class="toolbar-right">
-        <input type="text" class="filter-input" id="searchInput" placeholder="🔍 Search student, item..." oninput="filterTable()">
-        <input type="date" class="filter-input" id="dateFrom" style="width:140px" onchange="filterTable()">
-        <input type="date" class="filter-input" id="dateTo" style="width:140px" onchange="filterTable()">
-        <button class="btn btn-outline" onclick="clearFilters()">Clear</button>
-        <button class="btn btn-primary" onclick="loadData()">🔄 Refresh</button>
-        <button class="btn btn-outline" onclick="window.print()">🖨 Print</button>
-      </div>
+    <div class="controls">
+      <h2>Items Distribution Report</h2>
+      <input type="text"  id="search"   placeholder="🔍 Search student, item...">
+      <input type="date"  id="dateFrom">
+      <input type="date"  id="dateTo">
+      <button class="btn btn-ghost" onclick="clearFilters()">Clear</button>
+      <button class="btn btn-dark"  onclick="loadData()">🔄 Refresh</button>
+      <button class="btn btn-ghost" onclick="window.print()">🖨 Print</button>
     </div>
 
-    <!-- Stats -->
-    <div class="stats-grid" id="statsGrid">
-      <div class="stat-card"><div class="stat-label">Total Distributions</div><div class="stat-value" id="statTotal">—</div><div class="stat-sub">records</div></div>
-      <div class="stat-card"><div class="stat-label">Families Served</div><div class="stat-value" id="statFamilies">—</div><div class="stat-sub">unique students</div></div>
-      <div class="stat-card"><div class="stat-label">Items Given Out</div><div class="stat-value" id="statItems">—</div><div class="stat-sub">total qty</div></div>
-      <div class="stat-card"><div class="stat-label">Today</div><div class="stat-value" id="statToday">—</div><div class="stat-sub">distributions</div></div>
+    <div class="stats">
+      <div class="stat"><div class="stat-label">Distributions</div><div class="stat-val" id="sTotal">—</div><div class="stat-sub">total records</div></div>
+      <div class="stat"><div class="stat-label">Families</div><div class="stat-val" id="sFamilies">—</div><div class="stat-sub">unique students</div></div>
+      <div class="stat"><div class="stat-label">Items Given</div><div class="stat-val" id="sQty">—</div><div class="stat-sub">total quantity</div></div>
+      <div class="stat"><div class="stat-label">Today</div><div class="stat-val" id="sToday">—</div><div class="stat-sub">distributions</div></div>
     </div>
 
-    <!-- Stock Overview -->
-    <div class="stock-section">
-      <div class="section-title">📦 Current Stock Levels</div>
-      <div id="stockBars">
-        <div class="loading"><div class="spinner-lg"></div>Loading stock data...</div>
-      </div>
+    <div class="section-title">📦 Current Stock</div>
+    <div class="stock-grid" id="stockGrid"><div class="spinner"></div></div>
+
+    <div class="card">
+      <div class="card-header"><h3>📊 Summary by Item</h3></div>
+      <div id="itemSummary"><div class="spinner"></div></div>
     </div>
 
-    <!-- By Item Summary -->
-    <div class="table-section" style="margin-bottom:24px">
-      <div class="table-header">
-        <h3>📊 Given Out by Item</h3>
-      </div>
-      <div id="itemSummary">
-        <div class="loading"><div class="spinner-lg"></div></div>
-      </div>
-    </div>
-
-    <!-- Full Log -->
-    <div class="table-section">
-      <div class="table-header">
-        <h3>📋 Full Distribution Log</h3>
-        <span class="record-count" id="recordCount"></span>
-      </div>
-      <div id="tableBody">
-        <div class="loading"><div class="spinner-lg"></div>Loading data...</div>
-      </div>
+    <div class="card">
+      <div class="card-header"><h3>📋 Full Distribution Log</h3><span id="recordCount"></span></div>
+      <div id="logTable"><div class="spinner"></div></div>
     </div>
   </div>
 </div>
 
 <script>
-// ══════════════════════════════════════════════════════════
 const CONFIG = {
-  clientId:  "46f9bee8-ce6c-4ea8-ac32-8c18ffaf7c5c",
-  tenantId:  "0ce223f6-3606-4192-bfe5-63440d708a7a",
-  siteId:    "apotresedulb.sharepoint.com,8490485f-6089-48ba-8a03-18eabfeacfd1,d23ab96f-66fe-45d4-a625-a027739e4160",
-  fileId:    "327B85A4-6FEA-4759-BB01-667F3E74AF95",
+  clientId: "46f9bee8-ce6c-4ea8-ac32-8c18ffaf7c5c",
+  tenantId: "0ce223f6-3606-4192-bfe5-63440d708a7a",
+  siteId:   "apotresedulb.sharepoint.com,8490485f-6089-48ba-8a03-18eabfeacfd1,d23ab96f-66fe-45d4-a625-a027739e4160",
+  fileId:   "327B85A4-6FEA-4759-BB01-667F3E74AF95",
 };
+const SCOPES = ["Files.ReadWrite","Sites.ReadWrite.All","User.Read"];
+let msalInstance = null, accessToken = null;
+let allRows = [], stockData = [];
+let sortCol = "dateRaw", sortDir = -1;
 
-const SCOPES = ["Files.ReadWrite", "Sites.ReadWrite.All", "User.Read"];
-let msalInstance = null;
-let accessToken  = null;
-let allRows      = [];
-let stockData    = [];
+// Convert Excel serial date OR string date to readable format
+function excelDateToString(val) {
+  if (!val && val !== 0) return "";
+  if (typeof val === "string" && isNaN(Number(val))) {
+    // Already a string like "03/09/2025" — return as-is
+    return val;
+  }
+  const serial = Number(val);
+  if (!serial || serial < 1) return "";
+  // Convert Excel serial (days since 1900-01-01 with leap year bug)
+  const d = new Date(Math.round((serial - 25569) * 86400 * 1000));
+  return d.toLocaleDateString("en-GB", { day:"2-digit", month:"short", year:"numeric" });
+}
 
-// ── AUTH ──────────────────────────────────────────────────
+function excelSerial(dateStr) {
+  if (!dateStr) return 0;
+  const d = new Date(dateStr);
+  return Math.floor((d - new Date(1899,11,30)) / 86400000);
+}
+
+// AUTH
 async function init() {
   const btn = document.getElementById("loginBtn");
   btn.disabled = true; btn.textContent = "Loading...";
@@ -305,35 +223,27 @@ async function init() {
     auth: {
       clientId: CONFIG.clientId,
       authority: `https://login.microsoftonline.com/${CONFIG.tenantId}`,
-      redirectUri: window.location.href.split('?')[0],
+      redirectUri: window.location.href.split("?")[0],
     },
     cache: { cacheLocation: "sessionStorage" }
   });
   await msalInstance.initialize();
   btn.disabled = false;
-  btn.innerHTML = `<svg width="20" height="20" viewBox="0 0 21 21" fill="none">
-    <rect width="10" height="10" fill="#F25022"/>
-    <rect x="11" width="10" height="10" fill="#7FBA00"/>
-    <rect y="11" width="10" height="10" fill="#00A4EF"/>
-    <rect x="11" y="11" width="10" height="10" fill="#FFB900"/>
+  btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 21 21" fill="none">
+    <rect width="10" height="10" fill="#F25022"/><rect x="11" width="10" height="10" fill="#7FBA00"/>
+    <rect y="11" width="10" height="10" fill="#00A4EF"/><rect x="11" y="11" width="10" height="10" fill="#FFB900"/>
   </svg> Sign in with Microsoft`;
-
   const resp = await msalInstance.handleRedirectPromise();
-  if (resp) { accessToken = resp.accessToken; showApp(resp.account); }
-  else {
-    const accounts = msalInstance.getAllAccounts();
-    if (accounts.length > 0) {
-      try {
-        const s = await msalInstance.acquireTokenSilent({ scopes: SCOPES, account: accounts[0] });
-        accessToken = s.accessToken; showApp(accounts[0]);
-      } catch { showLogin(); }
-    } else { showLogin(); }
-  }
+  if (resp) { accessToken = resp.accessToken; showApp(resp.account); return; }
+  const accounts = msalInstance.getAllAccounts();
+  if (accounts.length > 0) {
+    try {
+      const s = await msalInstance.acquireTokenSilent({ scopes: SCOPES, account: accounts[0] });
+      accessToken = s.accessToken; showApp(accounts[0]);
+    } catch { showLogin(); }
+  } else { showLogin(); }
 }
-
-async function signIn() {
-  await msalInstance.loginRedirect({ scopes: SCOPES });
-}
+function signIn()  { msalInstance.loginRedirect({ scopes: SCOPES }); }
 function signOut() { msalInstance.logoutRedirect(); }
 function showLogin() {
   document.getElementById("loginScreen").style.display = "flex";
@@ -342,249 +252,145 @@ function showLogin() {
 function showApp(account) {
   document.getElementById("loginScreen").style.display = "none";
   document.getElementById("mainApp").style.display = "block";
-  document.getElementById("userEmail").textContent = account.username || account.name;
+  const el = document.getElementById("userEmail");
+  if (el) el.textContent = account.username || account.name;
   loadData();
 }
 
-// ── GRAPH ─────────────────────────────────────────────────
+// GRAPH
 async function graphGet(url) {
   const r = await fetch(`https://graph.microsoft.com/v1.0${url}`, {
     headers: { Authorization: `Bearer ${accessToken}` }
   });
-  if (!r.ok) throw new Error(`${r.status} ${await r.text()}`);
+  if (!r.ok) throw new Error(`${r.status}: ${await r.text()}`);
   return r.json();
 }
-
 async function getDriveId() {
   if (window._driveId) return window._driveId;
   const d = await graphGet(`/sites/${CONFIG.siteId}/drive`);
-  window._driveId = d.id;
-  return d.id;
+  window._driveId = d.id; return d.id;
 }
 
-// ── LOAD DATA ─────────────────────────────────────────────
+// LOAD
 async function loadData() {
-  document.getElementById("tableBody").innerHTML = `<div class="loading"><div class="spinner-lg"></div>Loading...</div>`;
-  document.getElementById("stockBars").innerHTML = `<div class="loading"><div class="spinner-lg"></div>Loading...</div>`;
-
+  ["logTable","stockGrid","itemSummary"].forEach(id =>
+    document.getElementById(id).innerHTML = `<div class="spinner"></div>`);
   try {
     const driveId = await getDriveId();
     const base = `/sites/${CONFIG.siteId}/drives/${driveId}/items/${CONFIG.fileId}/workbook/worksheets`;
+    const [distData, stockRaw] = await Promise.all([
+      graphGet(`${base}('Distributions')/range(address='B3:I500')`),
+      graphGet(`${base}('Stock')/range(address='B3:F20')`),
+    ]);
 
-    // Load Distributions (rows B3:I500)
-    const distRange = await graphGet(`${base}('Distributions')/range(address='B3:I500')`);
-    const distVals  = distRange.values || [];
+    stockData = (stockRaw.values||[]).filter(r=>r[0]&&r[0]!=="").map(r=>({
+      name:r[0], unit:r[1], initial:Number(r[2])||0, given:Number(r[3])||0, remain:Number(r[4])||0
+    }));
 
-    // Load Stock (rows B3:F20)
-    const stockRange = await graphGet(`${base}('Stock')/range(address='B3:F20')`);
-    const stockVals  = stockRange.values || [];
+    allRows = (distData.values||[]).filter(r=>r[2]&&r[2]!=="").map(r=>({
+      date:    excelDateToString(r[0]),
+      dateRaw: Number(r[0]) || excelSerial(r[0]) || 0,
+      item:    r[1]||"", student:r[2]||"", grade:r[3]||"",
+      parent:  r[4]||"", qty:Number(r[5])||1, notes:r[7]||""
+    }));
 
-    // Parse stock
-    stockData = stockVals
-      .filter(r => r[0] && r[0] !== "")
-      .map(r => ({
-        name:    r[0],
-        unit:    r[1],
-        initial: Number(r[2]) || 0,
-        given:   Number(r[3]) || 0,
-        remain:  Number(r[4]) || 0,
-      }));
-
-    // Parse distributions — columns: B=Date, C=Item, D=Student, E=Grade, F=Parent, G=Qty, H=Sig, I=Notes
-    allRows = distVals
-      .filter(r => r[2] && r[2] !== "")  // must have student name (col D = index 2)
-      .map((r, i) => ({
-        row:     i + 3,
-        date:    r[0] || "",
-        item:    r[1] || "",
-        student: r[2] || "",
-        grade:   r[3] || "",
-        parent:  r[4] || "",
-        qty:     Number(r[5]) || 1,
-        sig:     r[6] || "",
-        notes:   r[7] || "",
-      }));
-
-    renderStats();
-    renderStockBars();
-    renderItemSummary();
-    renderTable(allRows);
+    renderStats(); renderStock(); renderItemSummary(); applyFilters();
   } catch(e) {
-    document.getElementById("tableBody").innerHTML = `<div class="empty-state">❌ Error loading data: ${e.message}</div>`;
+    document.getElementById("logTable").innerHTML=`<div class="empty">❌ ${e.message}</div>`;
     console.error(e);
   }
 }
 
-// ── RENDER STATS ──────────────────────────────────────────
 function renderStats() {
-  const today = new Date().toLocaleDateString("en-GB");
-  const todayRows = allRows.filter(r => r.date === today);
-  const uniqueStudents = new Set(allRows.map(r => r.student)).size;
-  const totalQty = allRows.reduce((s, r) => s + r.qty, 0);
-
-  document.getElementById("statTotal").textContent    = allRows.length;
-  document.getElementById("statFamilies").textContent = uniqueStudents;
-  document.getElementById("statItems").textContent    = totalQty;
-  document.getElementById("statToday").textContent    = todayRows.length;
+  const todaySerial = excelSerial(new Date().toISOString().slice(0,10));
+  document.getElementById("sTotal").textContent    = allRows.length;
+  document.getElementById("sFamilies").textContent = new Set(allRows.map(r=>r.student)).size;
+  document.getElementById("sQty").textContent      = allRows.reduce((s,r)=>s+r.qty,0);
+  document.getElementById("sToday").textContent    = allRows.filter(r=>r.dateRaw===todaySerial).length;
 }
 
-// ── RENDER STOCK BARS ─────────────────────────────────────
-function renderStockBars() {
-  if (!stockData.length) {
-    document.getElementById("stockBars").innerHTML = `<div class="empty-state">No stock data found.</div>`;
-    return;
-  }
-  document.getElementById("stockBars").innerHTML = stockData.map(item => {
-    const pct    = item.initial > 0 ? Math.round((item.remain / item.initial) * 100) : 0;
-    const cls    = item.remain === 0 ? "none" : pct < 20 ? "low" : "ok";
-    const badge  = item.remain === 0 ? "badge-none" : pct < 20 ? "badge-low" : "badge-ok";
-    const label  = item.remain === 0 ? "Out of stock" : pct < 20 ? "Low stock" : "OK";
-    return `<div class="stock-item">
-      <div class="stock-item-top">
-        <span class="stock-item-name">${item.name}</span>
-        <div style="display:flex;align-items:center;gap:12px">
-          <span class="stock-item-nums">${item.remain} / ${item.initial} remaining</span>
-          <span class="stock-badge ${badge}">${label}</span>
-        </div>
-      </div>
-      <div class="progress-bar">
-        <div class="progress-fill ${cls}" style="width:${pct}%"></div>
-      </div>
+function renderStock() {
+  if (!stockData.length) { document.getElementById("stockGrid").innerHTML=`<div class="empty">No stock data.</div>`; return; }
+  document.getElementById("stockGrid").innerHTML = stockData.map(item=>{
+    const pct = item.initial>0 ? Math.round((item.remain/item.initial)*100) : 0;
+    const cls = item.remain===0?"none":pct<20?"low":"ok";
+    const lbl = item.remain===0?"Out of stock":pct<20?"Low stock":"OK";
+    return `<div class="stock-card">
+      <div class="stock-top"><span class="stock-name">${item.name}</span><span class="badge ${cls}">${lbl}</span></div>
+      <div class="stock-nums">${item.remain} of ${item.initial} remaining</div>
+      <div class="bar"><div class="bar-fill ${cls}" style="width:${pct}%"></div></div>
     </div>`;
   }).join("");
 }
 
-// ── RENDER ITEM SUMMARY ───────────────────────────────────
 function renderItemSummary() {
-  const byItem = {};
-  allRows.forEach(r => {
-    if (!byItem[r.item]) byItem[r.item] = { count: 0, qty: 0, students: new Set() };
-    byItem[r.item].count++;
-    byItem[r.item].qty += r.qty;
-    byItem[r.item].students.add(r.student);
+  const byItem={};
+  allRows.forEach(r=>{
+    if(!byItem[r.item]) byItem[r.item]={qty:0,students:new Set()};
+    byItem[r.item].qty+=r.qty; byItem[r.item].students.add(r.student);
   });
-
-  if (!Object.keys(byItem).length) {
-    document.getElementById("itemSummary").innerHTML = `<div class="empty-state">No distributions recorded yet.</div>`;
-    return;
-  }
-
-  document.getElementById("itemSummary").innerHTML = `
-    <table>
-      <thead><tr>
-        <th>Item</th>
-        <th>Times Given</th>
-        <th>Total Qty</th>
-        <th>Unique Students</th>
-        <th>% of Stock Used</th>
-      </tr></thead>
-      <tbody>
-        ${Object.entries(byItem).map(([name, d]) => {
-          const stock = stockData.find(s => s.name === name);
-          const pct   = stock && stock.initial > 0 ? Math.round((d.qty / stock.initial) * 100) : "—";
-          return `<tr>
-            <td><span class="tag">${name}</span></td>
-            <td style="font-family:'DM Mono',monospace">${d.count}</td>
-            <td><span class="qty-badge">${d.qty}</span></td>
-            <td style="font-family:'DM Mono',monospace">${d.students.size}</td>
-            <td style="font-family:'DM Mono',monospace">${pct}${pct !== "—" ? "%" : ""}</td>
-          </tr>`;
-        }).join("")}
-      </tbody>
-    </table>`;
+  if(!Object.keys(byItem).length){document.getElementById("itemSummary").innerHTML=`<div class="empty">No data yet.</div>`;return;}
+  document.getElementById("itemSummary").innerHTML=`<table>
+    <thead><tr><th>Item</th><th>Total Given</th><th>Families</th><th>% of Stock</th></tr></thead>
+    <tbody>${Object.entries(byItem).map(([name,d])=>{
+      const s=stockData.find(x=>x.name===name);
+      const pct=s&&s.initial>0?Math.round((d.qty/s.initial)*100)+"%":"—";
+      return `<tr><td><span class="tag">${name}</span></td><td class="num">${d.qty}</td><td class="num">${d.students.size}</td><td class="num">${pct}</td></tr>`;
+    }).join("")}</tbody></table>`;
 }
 
-// ── RENDER TABLE ──────────────────────────────────────────
-function renderTable(rows) {
-  document.getElementById("recordCount").textContent = `${rows.length} record${rows.length !== 1 ? "s" : ""}`;
-  if (!rows.length) {
-    document.getElementById("tableBody").innerHTML = `<div class="empty-state">No records found.</div>`;
-    return;
-  }
-  document.getElementById("tableBody").innerHTML = `
-    <table>
-      <thead><tr>
-        <th>#</th>
-        <th onclick="sortBy('date')">Date ↕</th>
-        <th onclick="sortBy('item')">Item ↕</th>
-        <th onclick="sortBy('student')">Student ↕</th>
-        <th>Grade</th>
-        <th>Parent / Guardian</th>
-        <th onclick="sortBy('qty')">Qty ↕</th>
-        <th>Notes</th>
-      </tr></thead>
-      <tbody>
-        ${rows.map((r, i) => `<tr>
-          <td style="color:var(--gray5);font-family:'DM Mono',monospace">${i+1}</td>
-          <td style="font-family:'DM Mono',monospace;font-size:11px">${r.date}</td>
-          <td><span class="tag">${r.item}</span></td>
-          <td style="font-weight:600">${r.student}</td>
-          <td style="color:var(--gray5)">${r.grade}</td>
-          <td>${r.parent}</td>
-          <td><span class="qty-badge">${r.qty}</span></td>
-          <td style="color:var(--gray5);font-size:11px">${r.notes}</td>
-        </tr>`).join("")}
-      </tbody>
-    </table>`;
+function renderLog(rows) {
+  document.getElementById("recordCount").textContent=`${rows.length} record${rows.length!==1?"s":""}`;
+  if(!rows.length){document.getElementById("logTable").innerHTML=`<div class="empty">No records found.</div>`;return;}
+  document.getElementById("logTable").innerHTML=`<table>
+    <thead><tr>
+      <th>#</th><th onclick="sort('dateRaw')">Date ↕</th><th onclick="sort('item')">Item ↕</th>
+      <th onclick="sort('student')">Student ↕</th><th>Grade</th><th>Parent</th>
+      <th onclick="sort('qty')">Qty ↕</th><th>Notes</th>
+    </tr></thead>
+    <tbody>${rows.map((r,i)=>`<tr>
+      <td class="num" style="color:var(--gray5)">${i+1}</td>
+      <td class="num" style="font-size:11px">${r.date}</td>
+      <td><span class="tag">${r.item}</span></td>
+      <td style="font-weight:600">${r.student}</td>
+      <td style="color:var(--gray5)">${r.grade}</td>
+      <td>${r.parent}</td>
+      <td class="num">${r.qty}</td>
+      <td style="color:var(--gray5);font-size:11px">${r.notes}</td>
+    </tr>`).join("")}</tbody></table>`;
 }
 
-// ── FILTER & SORT ─────────────────────────────────────────
-let sortCol = null, sortDir = 1;
-
-function filterTable() {
-  const search  = document.getElementById("searchInput").value.toLowerCase();
-  const dateFrom = document.getElementById("dateFrom").value;
-  const dateTo   = document.getElementById("dateTo").value;
-
-  let filtered = allRows.filter(r => {
-    const matchSearch = !search ||
-      r.student.toLowerCase().includes(search) ||
-      r.item.toLowerCase().includes(search) ||
-      r.parent.toLowerCase().includes(search) ||
-      r.grade.toLowerCase().includes(search);
-
-    // Convert DD/MM/YYYY to comparable format
-    const rowDate = parseDate(r.date);
-    const matchFrom = !dateFrom || rowDate >= dateFrom;
-    const matchTo   = !dateTo   || rowDate <= dateTo;
-
-    return matchSearch && matchFrom && matchTo;
+function applyFilters() {
+  const q=document.getElementById("search").value.toLowerCase();
+  const from=document.getElementById("dateFrom").value;
+  const to=document.getElementById("dateTo").value;
+  let rows=allRows.filter(r=>{
+    const mq=!q||r.student.toLowerCase().includes(q)||r.item.toLowerCase().includes(q)||r.parent.toLowerCase().includes(q);
+    const mf=!from||r.dateRaw>=excelSerial(from);
+    const mt=!to||r.dateRaw<=excelSerial(to);
+    return mq&&mf&&mt;
   });
-
-  if (sortCol) {
-    filtered.sort((a, b) => {
-      const av = a[sortCol], bv = b[sortCol];
-      return typeof av === "number"
-        ? (av - bv) * sortDir
-        : String(av).localeCompare(String(bv)) * sortDir;
-    });
-  }
-
-  renderTable(filtered);
+  rows.sort((a,b)=>{
+    const av=a[sortCol],bv=b[sortCol];
+    return(typeof av==="number"?av-bv:String(av).localeCompare(String(bv)))*sortDir;
+  });
+  renderLog(rows);
 }
 
-function parseDate(d) {
-  // Handle DD/MM/YYYY → YYYY-MM-DD for comparison
-  if (!d) return "";
-  const parts = d.split("/");
-  if (parts.length === 3) return `${parts[2]}-${parts[1].padStart(2,"0")}-${parts[0].padStart(2,"0")}`;
-  return d;
+function sort(col){sortDir=sortCol===col?-sortDir:1;sortCol=col;applyFilters();}
+function clearFilters(){
+  document.getElementById("search").value="";
+  document.getElementById("dateFrom").value="";
+  document.getElementById("dateTo").value="";
+  applyFilters();
 }
 
-function sortBy(col) {
-  if (sortCol === col) sortDir *= -1;
-  else { sortCol = col; sortDir = 1; }
-  filterTable();
-}
-
-function clearFilters() {
-  document.getElementById("searchInput").value = "";
-  document.getElementById("dateFrom").value = "";
-  document.getElementById("dateTo").value = "";
-  renderTable(allRows);
-}
-
-window.addEventListener("load", init);
+document.addEventListener("DOMContentLoaded",()=>{
+  document.getElementById("search").addEventListener("input",applyFilters);
+  document.getElementById("dateFrom").addEventListener("change",applyFilters);
+  document.getElementById("dateTo").addEventListener("change",applyFilters);
+});
+window.addEventListener("load",init);
 </script>
 </body>
 </html>
