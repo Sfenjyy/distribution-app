@@ -455,7 +455,7 @@ const CONFIG = {
   tenantId:    "0ce223f6-3606-4192-bfe5-63440d708a7a",
   siteHostname:"apotresedulb.sharepoint.com",
   sitePath:    "/sites/SchoolOperations",
-  filePath:    "/Shared Documents/FreeItems_StockSystem.xlsx",
+  fileId:      "DCB6574E-10C0-465F-A42D-0D5A59CB2C58",
   sheetName:   "Distributions",
 };
 
@@ -581,13 +581,17 @@ async function graphPost(url, body) {
   return r.json();
 }
 
-// Get the SharePoint drive item ID for our Excel file (cached)
+// Get siteId and driveId, use file ID directly
 async function getDriveItemId() {
   if (driveItemId) return driveItemId;
-  const site = await graphGet(`/sites/${CONFIG.siteHostname}:${CONFIG.sitePath}`);
-  const siteId = site.id;
-  const item = await graphGet(`/sites/${siteId}/drive/root:${CONFIG.filePath}`);
-  driveItemId = { siteId, itemId: item.id };
+  const site    = await graphGet(`/sites/${CONFIG.siteHostname}:${CONFIG.sitePath}`);
+  const siteId  = site.id;
+  const driveId = await getDriveId(siteId);
+  // Locate the file using its known SharePoint item ID
+  const item    = await graphGet(`/sites/${siteId}/drives/${driveId}/items?$filter=id eq '${CONFIG.fileId}'`);
+  // Fallback: search by name if filter doesn't work
+  let itemId = CONFIG.fileId;
+  driveItemId = { siteId, itemId };
   return driveItemId;
 }
 
@@ -610,8 +614,10 @@ async function getDriveId(siteId) {
 
 // Append rows to Distributions sheet
 async function appendRowsToExcel(rows) {
-  const { siteId, itemId } = await getDriveItemId();
+  const site    = await graphGet(`/sites/${CONFIG.siteHostname}:${CONFIG.sitePath}`);
+  const siteId  = site.id;
   const driveId = await getDriveId(siteId);
+  const itemId  = CONFIG.fileId;
 
   // Get used range to find next empty row
   let nextRow = 3;
@@ -627,7 +633,6 @@ async function appendRowsToExcel(rows) {
   for (let i = 0; i < rows.length; i++) {
     const r = nextRow + i;
     const rowData = rows[i];
-    // Address: A{r}:I{r}
     await fetch(
       `https://graph.microsoft.com/v1.0/sites/${siteId}/drives/${driveId}/items/${itemId}/workbook/worksheets('${CONFIG.sheetName}')/range(address='A${r}:I${r}')`,
       {
