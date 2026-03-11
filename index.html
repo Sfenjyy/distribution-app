@@ -89,6 +89,15 @@
   .brand h1 { font-size: 15px; font-weight: 600; }
   .brand span { font-size: 12px; color: #93c5fd; font-weight: 400; }
   .header-right { display: flex; align-items: center; gap: 12px; }
+  .nav-link {
+    background: rgba(255,255,255,.08);
+    border: 1px solid rgba(255,255,255,.15);
+    color: #bfdbfe; padding: 5px 14px;
+    border-radius: 8px; font-family: inherit;
+    font-size: 12px; cursor: pointer; text-decoration: none;
+    transition: background .15s;
+  }
+  .nav-link:hover { background: rgba(255,255,255,.18); color: #fff; }
   .user-pill {
     background: rgba(255,255,255,.1);
     border: 1px solid rgba(255,255,255,.15);
@@ -359,7 +368,7 @@
       </div>
     </div>
     <div class="header-right">
-      <div class="user-pill">👤 <span id="userEmail"></span></div>
+      <a class="nav-link" href="report.html" target="_blank">📊 View Report</a>
       <button class="signout-btn" onclick="signOut()">Sign out</button>
     </div>
   </header>
@@ -454,7 +463,7 @@ const CONFIG = {
   clientId:    "46f9bee8-ce6c-4ea8-ac32-8c18ffaf7c5c",
   tenantId:    "0ce223f6-3606-4192-bfe5-63440d708a7a",
   siteId:      "apotresedulb.sharepoint.com,8490485f-6089-48ba-8a03-18eabfeacfd1,d23ab96f-66fe-45d4-a625-a027739e4160",
-  fileId:      "DCB6574E-10C0-465F-A42D-0D5A59CB2C58",
+  fileId:      "327B85A4-6FEA-4759-BB01-667F3E74AF95",
   sheetName:   "Distributions",
 };
 
