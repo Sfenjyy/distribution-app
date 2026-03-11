@@ -453,8 +453,7 @@
 const CONFIG = {
   clientId:    "46f9bee8-ce6c-4ea8-ac32-8c18ffaf7c5c",
   tenantId:    "0ce223f6-3606-4192-bfe5-63440d708a7a",
-  siteHostname:"apotresedulb.sharepoint.com",
-  sitePath:    "/sites/SchoolOperations",
+  siteId:      "apotresedulb.sharepoint.com,8490485f-6089-48ba-8a03-18eabfeacfd1,d23ab96f-66fe-45d4-a625-a027739e4160",
   fileId:      "DCB6574E-10C0-465F-A42D-0D5A59CB2C58",
   sheetName:   "Distributions",
 };
@@ -463,14 +462,12 @@ const CONFIG = {
 // ITEMS — match names exactly to the Stock sheet
 // ══════════════════════════════════════════════════════════════
 const ITEMS = [
-  { id:1, name:"School Bag",           unit:"Piece", stock:100, icon:"🎒" },
-  { id:2, name:"Notebook Set (5 pcs)", unit:"Set",   stock:80,  icon:"📓" },
-  { id:3, name:"Pencil Case",          unit:"Piece", stock:80,  icon:"✏️"  },
-  { id:4, name:"Geometry Box",         unit:"Piece", stock:60,  icon:"📐" },
-  { id:5, name:"Water Bottle",         unit:"Piece", stock:100, icon:"🍶" },
-  { id:6, name:"Folder / Binder",      unit:"Piece", stock:50,  icon:"📁" },
-  { id:7, name:"USB Flash Drive",      unit:"Piece", stock:30,  icon:"💾" },
-  { id:8, name:"Coloring Kit",         unit:"Set",   stock:40,  icon:"🎨" },
+  { id:1, name:"Sticky Notepad",                  unit:"Piece", stock:500, icon:"📒" },
+  { id:2, name:"Pencil Case",                      unit:"Piece", stock:500, icon:"✏️"  },
+  { id:3, name:"Spiral Craft Notebook",            unit:"Piece", stock:500, icon:"📓" },
+  { id:4, name:"Set Colorings Books+Pencils",      unit:"Set",   stock:500, icon:"🎨" },
+  { id:5, name:"Pencil Tube",                      unit:"Piece", stock:500, icon:"🖊️"  },
+  { id:6, name:"Cotton Bag 50z",                   unit:"Piece", stock:500, icon:"👜" },
 ];
 
 // ══════════════════════════════════════════════════════════════
@@ -488,7 +485,6 @@ let msalInstance = null;
 const scopes = ["Files.ReadWrite", "Sites.ReadWrite.All", "User.Read"];
 
 let accessToken = null;
-let driveItemId = null;
 let sessionLog  = [];
 let cart = {};
 
@@ -581,69 +577,55 @@ async function graphPost(url, body) {
   return r.json();
 }
 
-// Get siteId and driveId, use file ID directly
-async function getDriveItemId() {
-  if (driveItemId) return driveItemId;
-  const site    = await graphGet(`/sites/${CONFIG.siteHostname}:${CONFIG.sitePath}`);
-  const siteId  = site.id;
-  const driveId = await getDriveId(siteId);
-  // Locate the file using its known SharePoint item ID
-  const item    = await graphGet(`/sites/${siteId}/drives/${driveId}/items?$filter=id eq '${CONFIG.fileId}'`);
-  // Fallback: search by name if filter doesn't work
-  let itemId = CONFIG.fileId;
-  driveItemId = { siteId, itemId };
-  return driveItemId;
-}
-
-// Find the next empty row in the Distributions sheet
-async function getNextEmptyRow() {
-  const { siteId, itemId } = await getDriveItemId();
-  // Read column D (Student Name) from row 3 down to find last used row
-  const range = await graphGet(
-    `/sites/${siteId}/drives/${await getDriveId(siteId)}/items/${itemId}/workbook/worksheets('${CONFIG.sheetName}')/usedRange`
-  );
-  return (range.rowCount || 2) + 1; // next row after used range
-}
-
-async function getDriveId(siteId) {
+// Get drive ID (cached)
+async function getDriveId() {
   if (window._driveId) return window._driveId;
-  const drive = await graphGet(`/sites/${siteId}/drive`);
+  const drive = await graphGet(`/sites/${CONFIG.siteId}/drive`);
   window._driveId = drive.id;
   return drive.id;
 }
 
-// Append rows to Distributions sheet
+// Append rows to Distributions sheet using hardcoded IDs
 async function appendRowsToExcel(rows) {
-  const site    = await graphGet(`/sites/${CONFIG.siteHostname}:${CONFIG.sitePath}`);
-  const siteId  = site.id;
-  const driveId = await getDriveId(siteId);
+  const driveId = await getDriveId();
   const itemId  = CONFIG.fileId;
+  const siteId  = CONFIG.siteId;
+  const base    = `https://graph.microsoft.com/v1.0/sites/${siteId}/drives/${driveId}/items/${itemId}/workbook/worksheets('${CONFIG.sheetName}')`;
 
-  // Get used range to find next empty row
+  // Read column D (Student Name) to find last filled row
+  // Check rows 3 to 200 by reading a large range
   let nextRow = 3;
   try {
-    const used = await graphGet(
-      `/sites/${siteId}/drives/${driveId}/items/${itemId}/workbook/worksheets('${CONFIG.sheetName}')/usedRange`
+    const range = await graphGet(
+      `/sites/${siteId}/drives/${driveId}/items/${itemId}/workbook/worksheets('${CONFIG.sheetName}')/range(address='D3:D200')`
     );
-    nextRow = (used.rowCount || 2) + 1;
-    if (nextRow < 3) nextRow = 3;
+    const vals = range.values || [];
+    // Find last non-empty row
+    let lastFilled = 0;
+    for (let i = 0; i < vals.length; i++) {
+      if (vals[i][0] !== null && vals[i][0] !== "") lastFilled = i;
+    }
+    nextRow = lastFilled + 1 + 3; // +3 because we start at row 3
   } catch { nextRow = 3; }
 
   // Write each row
   for (let i = 0; i < rows.length; i++) {
     const r = nextRow + i;
-    const rowData = rows[i];
-    await fetch(
-      `https://graph.microsoft.com/v1.0/sites/${siteId}/drives/${driveId}/items/${itemId}/workbook/worksheets('${CONFIG.sheetName}')/range(address='A${r}:I${r}')`,
+    const response = await fetch(
+      `${base}/range(address='B${r}:I${r}')`,
       {
         method: "PATCH",
         headers: {
           Authorization: `Bearer ${accessToken}`,
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({ values: [rowData] })
+        body: JSON.stringify({ values: [rows[i]] })
       }
     );
+    if (!response.ok) {
+      const err = await response.text();
+      throw new Error(`Failed to write row ${r}: ${err}`);
+    }
   }
 }
 
@@ -771,14 +753,13 @@ async function confirmDistribution() {
   const rows = Object.keys(cart).map(id => {
     const item = ITEMS.find(i=>i.id==id);
     return [
-      "",           // A: # (auto-calculated by formula)
       date,         // B: Date
       item.name,    // C: Item Given
       sn,           // D: Student Name
       sg,           // E: Grade / Class
       pn,           // F: Parent / Guardian
       cart[id],     // G: Qty Given
-      "",           // H: Received By (signature — left blank)
+      "",           // H: Received By (signature)
       ""            // I: Notes
     ];
   });
