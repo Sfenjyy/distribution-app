@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Free Items Distribution — Collège des Apôtres</title>
+<title>Items Distribution — Collège des Apôtres</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script type="text/javascript" src="https://alcdn.msauth.net/browser/2.35.0/js/msal-browser.min.js"></script>
 <script type="text/javascript">
@@ -181,7 +181,7 @@
       </div>
 
       <div class="section-label">2 — Select Items</div>
-      <div id="stockStatus" class="stock-loading">⏳ Loading stock from Excel...</div>
+      <div id="stockStatus" class="stock-loading">⏳ Loading stock ...</div>
       <div class="items-grid" id="itemsGrid"></div>
 
       <div class="log-panel" style="margin-top:32px">
@@ -221,7 +221,7 @@
     <ul class="modal-list" id="modalList"></ul>
     <div class="modal-actions">
       <button class="modal-cancel" onclick="closeModal()">Cancel</button>
-      <button class="modal-confirm" onclick="confirmDistribution()">✅ Confirm & Save to Excel</button>
+      <button class="modal-confirm" onclick="confirmDistribution()">✅ Confirm & Save </button>
     </div>
   </div>
 </div>
@@ -326,7 +326,7 @@ async function loadStockFromExcel() {
     });
     status.style.display = "none";
   } catch(e) {
-    status.textContent = "⚠️ Could not load stock from Excel";
+    status.textContent = "⚠️ Could not load stock";
     ITEMS.forEach(i => { if (i.stock === 0) i.stock = 500; }); // fallback
     console.warn("Stock load error:", e.message);
   }
@@ -454,7 +454,7 @@ async function confirmDistribution() {
 
   const btn = document.getElementById("confirmBtn");
   btn.classList.add("saving"); btn.disabled = true;
-  showStatus("⏳ Saving to Excel...", "warning");
+  showStatus("⏳ Saving ...", "warning");
 
   const rows = Object.keys(cart).map(id => {
     const item = ITEMS.find(i=>i.id==id);
